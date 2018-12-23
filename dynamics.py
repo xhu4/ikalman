@@ -7,6 +7,8 @@ from scipy.linalg import expm
 from ipywidgets import (Play, FloatSlider, Button, HBox, fixed, VBox,
                         interactive, IntSlider, jslink)
 
+# Uncomment for reproducible result
+# np.random.seed(36)
 
 def queue(lst, num, max_len):
     """
@@ -28,7 +30,7 @@ class Figure:
     """Controls a bqplot figure instance."""
 
     def __init__(self, animation_duration=100, aspect_ratio=1,
-                 tail_len=1000, size=2):
+                 tail_len=1000, lim=2):
         axes_options = {'x': {'label': 'x'}, 'y': {'label': 'y'}}
         self.fig = plt.figure(animation_duration=animation_duration,
                               min_aspect_ratio=aspect_ratio,
@@ -39,8 +41,8 @@ class Figure:
                                'red'], stroke_width=3)
         self.scat = plt.plot([], [], 'ro')
         self.tail_len = tail_len
-        plt.xlim(-size, size)
-        plt.ylim(-size, size)
+        plt.xlim(-lim, lim)
+        plt.ylim(-lim, lim)
 
     def add_line(self, *args, **kwargs):
         return plt.plot(*args, figure=self.fig, **kwargs)
@@ -150,7 +152,19 @@ class DynamicPlotter:
 
 
 class KalmanFilter:
+    """
+    A Kalman-Bucy Filter for the linear filtering problem
+        dX_t = F X_tdt + C dU_t;    # Dynamic system
+        dZ_t = G X_tdt + D dV_t.    # Data
+    """
+
     def __init__(self, F, G, C, D, x0=None, S0=None, **useless):
+        """
+        Parameters:
+            x0: initial guess
+            S0: variance (matrix) of initial guess
+        """
+
         self.A = np.asarray(F)
         self.H = np.asarray(G)
         self.eye = np.eye(self.A.shape[0])
@@ -223,13 +237,26 @@ dsct = DynamicPlotter(discrete, [1, 1], observe=_observe, i=Play(),
 
 
 cnts = DynamicPlotter(continuous, [0, 1], observe=_observe,
-                      fig=Figure(size=3),  i=Play(), sigma=_sigma_sld(),
+                      fig=Figure(lim=3),  i=Play(), sigma=_sigma_sld(),
                       gamma=_sigma_sld(description=r'\(\gamma\)'),
                       dt=fixed(0.05), sleep=_spd_sld())
 
 
 def do_filter(init_guess=[0, 1], S0=np.eye(2), ic=[0, 1], N=1000,
               sigma=0.2, gamma=0.2, dt=0.1):
+    """
+    Do Kalman Filter for continuous circular model.
+    
+    Parameters
+        - init_guess: initial guess
+        - S0: variance (matrix) of initial guess
+        - ic: true initial condition
+        - N: number of time steps
+        - sigma: standard deviation of perturbation in dynamics
+        - gamma: standard deviation of noise in data
+        - dt: time step length in our model
+    """
+
     KF = KalmanFilter(F=[[0, 1], [-1, 0]], G=[[0, 1]], C=sigma, D=gamma)
     KF.build(dt)
 
@@ -257,13 +284,14 @@ def _load():
     return f['x'], f['m'], f['data'], f['error']
 
 
-error = None
+error = None    # A global error to reuse the data
 
 
-def show_result(figsize=20):
+def show_result(lim=20):
+    """Display filter result."""
     global error
     x, m, data, error = _load()
-    fig = Figure(size=figsize)
+    fig = Figure(lim=lim)
     fig.hline.opacities = [0.75]
     estline = fig.add_line([], [], 'go')
 
@@ -288,6 +316,7 @@ def show_result(figsize=20):
 
 
 def plot_error():
+    """Plot error of our filter along time."""
     axes_options = {'x': {'label': 't'}, 'y': {'label': 'error'}}
     fig = plt.figure()
     plt.plot(np.arange(1000)*0.1, error, axes_options=axes_options)
