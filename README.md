@@ -11,7 +11,10 @@ This is a course project for the course _Stochastic Processes and Applications_,
 in 2018 Fall, at University of Wyoming. So it is heavily written in Stochastic 
 language and notations taught in that course. But the interactive plots and the 
 notes directly after the plots could be helpful in understanding what _filtering_
-and _data_assimilation_ is about.
+and _data assimilation_ is about.
+
+You can use [RISE](https://github.com/damianavila/RISE) to convert the notebook
+into slides.
 
 Run a discrete square dynamic interactively
 ![](screenshots/dscrt_HD.gif)
