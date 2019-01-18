@@ -7,6 +7,12 @@
 [An interactive jupyter notebook](https://mybinder.org/v2/gh/xhu4/ikalman/master?filepath=ikalman.ipynb)
 to illustrate Kalman-Bucy filter.
 
+This is a course project for the course _Stochastic Processes and Applications_, 
+in 2018 Fall, at University of Wyoming. So it is heavily written in Stochastic 
+language and notations taught in that course. But the interactive plots and the 
+notes directly after the plots could be helpful in understanding what _filtering_
+and _data_assimilation_ is about.
+
 Run a discrete square dynamic interactively
 ![](screenshots/dscrt_HD.gif)
 
